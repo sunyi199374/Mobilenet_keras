@@ -1,0 +1,51 @@
+.from __future__ import print_function
+import keras
+import car2626data
+import mobilenet
+from keras.preprocessing.image import ImageDataGenerator
+from keras.models import Sequential
+from keras.layers import Dense, Dropout, Activation, Flatten
+from keras.layers import Conv2D, MaxPooling2D
+from mobilenet import MobileNet
+batch_size = 128
+num_classes = 2626
+epochs = 95
+
+# The data, shuffled and split between train and test sets:
+(x_train, y_train), (x_test, y_test) = car2626data.load_data()
+print('x_train shape:', x_train.shape)
+print(x_train.shape[0], 'train samples')
+print(x_test.shape[0], 'test samples')
+
+# Convert class vectors to binary class matrices.
+y_train = keras.utils.to_categorical(y_train, num_classes)
+y_test = keras.utils.to_categorical(y_test, num_classes)
+
+MODEL = MobileNet()
+
+
+# initiate RMSprop optimizer
+opt = keras.optimizers.rmsprop(lr=0.0004, decay=1e-6)
+
+# Let's train the model using RMSprop
+MODEL.model.compile(loss='categorical_crossentropy',
+              optimizer=opt,
+              metrics=['accuracy'])
+
+x_train /= 255
+x_test /= 255
+
+MODEL.model.fit(x_train, y_train,
+          batch_size=batch_size,
+          epochs=epochs,
+          verbose=1,
+          validation_data=(x_test, y_test))
+score = MODEL.model.evaluate(x_test, y_test, verbose=0)
+print('Test loss:', score[0])
+print('Test accuracy:', score[1])
+MODEL.model.save_weights('mobilenet_car2626_model.h5')
+--------------------- 
+作者：开心快乐Jane 
+来源：CSDN 
+原文：https://blog.csdn.net/qq_25220145/article/details/71436512 
+版权声明：本文为博主原创文章，转载请附上博文链接！
